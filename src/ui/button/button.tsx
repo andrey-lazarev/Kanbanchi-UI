@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { IButtonInheritedProps } from './types';
-import { ClassNames } from '../utils';
-import { ButtonTitle, Icon } from '../../ui';
+import { ClassNames, useCombinedRefs } from '../utils';
+import { ButtonTitle, Icon, Tooltip } from '../../ui';
 import '../../../src/ui/button/button.module.scss';
 
 export const Button: React.SFC<IButtonInheritedProps> =
@@ -10,14 +10,20 @@ React.forwardRef((props, ref) => {
         children,
         className,
         color,
+        maxWidth,
+        progress,
         size,
-        variant,
         text,
+        tooltip,
+        variant,
         ...attributes
     } = props,
         iconBefore = null,
         iconAfter = null,
         childrenDiv = null;
+
+    const _buttonRef = React.useRef(null);
+    const buttonRef =  useCombinedRefs(ref, _buttonRef);
 
     let {
         disabled,
@@ -45,6 +51,8 @@ React.forwardRef((props, ref) => {
         (color) ? 'kui-button--color_' + color: null,
         (size) ? 'kui-button--size_' + size : null,
         (disabled) ? 'kui-button--disabled' : null,
+        (maxWidth) ? 'kui-button--maxwidth_' + maxWidth : null,
+        (progress !== null) ? 'kui-button--progress' : null,
         className
     );
 
@@ -58,19 +66,19 @@ React.forwardRef((props, ref) => {
             iconAfter = <Icon {...iconProps} />;
             break;
         case 'action':
-            iconProps.xlink = 'dots';
+            iconProps.xlink = 'more';
             iconBefore = <Icon {...iconProps} />;
             break;
         case 'text':
-            iconProps.xlink = 'arrow-long-right';
+            iconProps.xlink = 'arrow-button';
             iconAfter = <Icon {...iconProps} />;
             break;
     }
 
-    return (
+    const buttonElement = (
         <Tag
             className={className}
-            ref={ref}
+            ref={buttonRef}
             {...attributes}
         >
             {iconBefore}
@@ -80,17 +88,39 @@ React.forwardRef((props, ref) => {
                     {text}
                 </ButtonTitle>
             }
+            {progress !== null &&
+                <div
+                    className="kui-button__progress"
+                    style={{width: progress + '%'}}>
+                </div>
+            }
             {iconAfter}
         </Tag>
     );
+
+    if (tooltip) {
+        const tooltipProps = (typeof tooltip === 'string')
+            ? { value: tooltip }
+            : tooltip;
+        return (
+            <Tooltip {...tooltipProps}>
+                {buttonElement}
+            </Tooltip>
+        )
+    }
+
+    return buttonElement;
 });
 
 Button.defaultProps = {
     color: null,
     disabled: false,
     href: null,
+    maxWidth: null,
+    progress: null,
     size: null,
     text: null,
+    tooltip: null,
     type: 'button',
     variant: 'primary'
 };

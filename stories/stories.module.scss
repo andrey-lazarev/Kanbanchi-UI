@@ -1,5 +1,15 @@
 @import '../src/assets/sass/index.scss';
 
+body {
+    overflow: hidden;
+}
+
+#root {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+}
+
 section {
     padding: 2em;
     z-index: $z-initials;
@@ -95,7 +105,9 @@ section {
     justify-content: space-between;
     align-items: space-between;
     flex-wrap: wrap;
-    height: $google-spacing * 30;
+    height: $google-spacing * 60;
+    max-width: 90%;
+    margin-left: 10%;
 
     & > * {
         flex: 1 1 33%;
@@ -114,6 +126,56 @@ section {
     }
 }
 
+.stories-hint-tutor {
+    width: 300px;
+}
+.card-for-tutorial-hint {
+    margin-bottom: $google-spacing;
+    width: 300px;
+    height: 100px;
+    text-align: center;
+    background: $color-background;
+}
+
 .w100px {
     width: 100px;
+}
+
+.story-tags-max-width-100 {
+    .kui-tag__text {
+        max-width: 100px;
+    }
+}
+
+.stories-accordions {
+    position: relative;
+    max-height: 200px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    @include wrap-scroll;
+
+    .kui-section-accordion {
+        @include wrap-scroll-inner;
+    }
+}
+
+.kui-button-dropdown.stories-dropdown-100 {
+    display: block;
+
+    .kui-dropdown__item {
+        min-width: 100%;
+    }
+
+    .kui-checkbox__label {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+}
+
+#stories-portal {
+    position: absolute;
+    width: 300px;
+    top: 0;
+    left: 0;
 }

@@ -4,8 +4,6 @@
     display: inline-block;
 
     &__item {
-        background: $color-white;
-        
         .kui-button__icon {
             color: calc-color(tint, $color-base, 30);
         }
@@ -24,7 +22,7 @@
         min-width: $google-spacing * 25;
     }
 
-    &--disabled {
+    &.kui-button-dropdown--disabled:not(.kui-button-dropdown--opened) {
         cursor: default;
         pointer-events: none;
     }

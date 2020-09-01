@@ -1,8 +1,7 @@
 import * as React from 'react';
 import { storiesOf } from '@storybook/react';
-import { ButtonsGroup, Select, SelectList, SelectListItem } from '../../src/ui';
+import { ButtonsGroup, Select, SelectList, SelectListItem, Search, Checkbox, Userpic } from '../../src/ui';
 import { ISelectActiveInheritedProps } from '../../src/ui/select/types';
-
 
 const Story = () => {
 
@@ -12,14 +11,117 @@ const Story = () => {
     const [val03, setVal03] = React.useState(0);
     const [val04, setVal04] = React.useState(null);
     const [val05, setVal05] = React.useState(0);
+    const [val06, setVal06] = React.useState(false);
+
+    const [searchOptions, setSearchOptions] = React.useState([
+        {active: false, value: 0, text: 'Option 0'},
+        {active: false, value: 1, text: 'Option 1'},
+        {active: false, value: 2, text: 'Option 2'},
+        {active: false, value: 3, text: 'Option 3'},
+        {active: false, value: 10, text: 'Option 10'},
+        {active: false, value: 11, text: 'Option 11'},
+        {active: false, value: 12, text: 'Option 12'},
+        {active: false, value: 13, text: 'Option 13'},
+    ]);
+    const [searchFiltered, setSearchFiltered] = React.useState(searchOptions);
+
+    const filterSearchOptions = (i: ISelectActiveInheritedProps) => {
+        if (i.item) {
+            const index = searchOptions.findIndex(option => String(option.value) === String(i.item.value));
+            const option = searchOptions[index];
+            setSearchOptions([
+                ...searchOptions.slice(0, index),
+                {
+                    ...option,
+                    active: !option.active
+                },
+                ...searchOptions.slice(index + 1),
+            ]);
+            searchFiltered[i.item.index].active = !searchFiltered[i.item.index].active;
+            setSearchFiltered(searchFiltered);
+        } else if (i.target) {
+            const target: any = i.target;
+            const value = target.value;
+            const filteredOptions = value ?
+                searchOptions.filter(option => option.text.includes(value)) :
+                searchOptions;
+            setSearchFiltered([...filteredOptions]);
+            console.log(selectRef.current);
+        }
+    }
+
+    const selectRef = React.useRef(null);
 
     return (
         <div className="page">
             <section className="section-form-min">
                 <h2>Select</h2>
 
+                <Search
+                    editable={true}
+                    label="Multiple if click on checkbox"
+                    multiple={true}
+                    single={true}
+                    onChange={i => console.log(i)}
+                >
+                    <SelectList>
+                        <Checkbox
+                            checked={val06}
+                            color="light"
+                            value="1"
+                            onChange={()=>setVal06(!val06)}
+                        >
+                            <SelectListItem>
+                                <Userpic
+                                    size={24}
+                                    src="https://cdn.pixabay.com/photo/2016/08/20/05/38/avatar-1606916_960_720.png"
+                                />
+                                User01
+                            </SelectListItem>
+                        </Checkbox>
+                    </SelectList>
+                </Search>
+
+                <br/><br/><br/>
+
+                <Search
+                    editable={true}
+                    label="Multiple"
+                    multiple={true}
+                    options={searchFiltered}
+                    onChange={filterSearchOptions}
+                    ref={selectRef}
+                >
+                </Search>
+
+                {
+                    searchOptions.reduce((actives, option) => {
+                        if (option.active) {
+                            actives.push(option.text || option.value);
+                        }
+                        return actives;
+                    }, []).join(', ')
+                }
+
+                <br/><br/>
+
                 <Select
-                    active={val04}
+                    active={1}
+                    disabled
+                    label="Disabled"
+                    options={{
+                        0: 'Option 0',
+                        1: 'Option 1'
+                    }}
+                    variant="arrow"
+                    onChange={null}
+                >
+                </Select>
+
+                <br/><br/>
+
+                <Select
+                    //active={val04}
                     label="Options Object"
                     options={{
                         0: 'Option 0',
@@ -27,7 +129,10 @@ const Story = () => {
                         '2': 'Option 2'
                     }}
                     variant="arrow"
-                    onChange={(i: ISelectActiveInheritedProps)=>setVal04(i.item.index)}
+                    onChange={(i: ISelectActiveInheritedProps) => {
+                        console.log(i.item.text);
+                        setVal04(i.item.index);
+                    }}
                 >
                 </Select>
 
@@ -35,6 +140,7 @@ const Story = () => {
 
                 <Select
                     active={val05}
+                    editable={true}
                     label="Options Array"
                     options={[
                         {value: 0, text: 'Option 0'},
@@ -42,7 +148,12 @@ const Story = () => {
                         {value: '2', text: 'Option 2'},
                     ]}
                     variant="arrow"
-                    onChange={(i: ISelectActiveInheritedProps)=>setVal05(i.item.index)}
+                    onChange={(i: ISelectActiveInheritedProps) => {
+                        if (i.item) {
+                            console.log(i.item.text);
+                            setVal05(i.item.index);
+                        }
+                    }}
                 >
                 </Select>
 
@@ -64,6 +175,17 @@ const Story = () => {
                     </SelectList>
                 </Select>
 
+                <br/><br/>
+
+                <Select
+                    active={0}
+                    disabled={true}
+                    label="Disabled"
+                    value="Professional monthly"
+                    variant="header"
+                    onChange={()=>{}}
+                ></Select>
+
             </section>
 
             <section>
@@ -72,36 +194,44 @@ const Story = () => {
                         <ButtonsGroup size="large">
                             <Select
                                 active={val01}
-                                editable={true}
+                                editable={false}
                                 label="Number"
                                 style={{width: 100}}
                                 type="number"
                                 variant="arrow"
-                                onChange={(i: ISelectActiveInheritedProps)=>setVal01(i.item.index)}
+                                onChange={(i: ISelectActiveInheritedProps) => {
+                                    if (i.item) {
+                                        setVal01(i.item.index)
+                                    }
+                                }}
                             >
                                 <SelectList>
                                     <li className="divider">0</li>
                                     <li>1</li>
                                     <li>2</li>
-                                    <li>3</li>
+                                    <li className="disabled">3 Disabled</li>
                                     <li>4</li>
                                     <li>5</li>
                                     <li>6</li>
                                     <li>7</li>
                                     <li>8</li>
                                     <li>9</li>
-                                    <li className="divider">10</li>
-                                    <li className="disabled">Disabled</li>
+                                    <li>10</li>
                                 </SelectList>
                             </Select>
                             <Select
                                 active={val02}
                                 editable={true}
-                                label="Time"
-                                icon="deadline"
+                                label="Time isFitWindow"
+                                icon="overdue"
+                                isFitWindow={true}
                                 variant="withicon"
                                 style={{width: 120}}
-                                onChange={(i: ISelectActiveInheritedProps)=>setVal02(i.item.index)}
+                                onChange={(i: ISelectActiveInheritedProps) => {
+                                    if (i.item) {
+                                        setVal02(i.item.index)
+                                    }
+                                }}
                             >
                                 <SelectList>
                                     <li>12:00 AM</li>
@@ -155,6 +285,86 @@ const Story = () => {
                                 </SelectList>
                             </Select>
                         </ButtonsGroup>
+
+                        <br />
+
+                        <ButtonsGroup size="large">
+                            <Select
+                                label="Readonly"
+                                readOnly
+                                style={{width: 100}}
+                                type="number"
+                                variant="arrow"
+                                onChange={(i: ISelectActiveInheritedProps) => {
+                                    if (i.item) {
+                                        setVal01(i.item.index)
+                                    }
+                                }}
+                            >
+                                <SelectList>
+                                    <li>1</li>
+                                </SelectList>
+                            </Select>
+                            <Select
+                                active={0}
+                                editable={true}
+                                label="Readonly"
+                                icon="overdue"
+                                variant="withicon"
+                                readOnly
+                                style={{width: 120}}
+                                onChange={(i: ISelectActiveInheritedProps) => {
+                                    if (i.item) {
+                                        setVal02(i.item.index)
+                                    }
+                                }}
+                            >
+                                <SelectList>
+                                    <li>12:00 AM</li>
+                                    <li>1</li>
+                                </SelectList>
+                            </Select>
+                        </ButtonsGroup>
+
+                        <br />
+
+                        <ButtonsGroup size="large">
+                            <Select
+                                label="Disabled"
+                                disabled
+                                style={{width: 100}}
+                                type="number"
+                                variant="arrow"
+                                onChange={(i: ISelectActiveInheritedProps) => {
+                                    if (i.item) {
+                                        setVal01(i.item.index)
+                                    }
+                                }}
+                            >
+                                <SelectList>
+                                    <li>1</li>
+                                </SelectList>
+                            </Select>
+                            <Select
+                                active={0}
+                                editable={true}
+                                label="Disabled"
+                                icon="overdue"
+                                variant="withicon"
+                                disabled
+                                style={{width: 120}}
+                                onChange={(i: ISelectActiveInheritedProps) => {
+                                    if (i.item) {
+                                        setVal02(i.item.index)
+                                    }
+                                }}
+                            >
+                                <SelectList>
+                                    <li>12:00 AM</li>
+                                    <li>1</li>
+                                </SelectList>
+                            </Select>
+                        </ButtonsGroup>
                     </div>
 
             </section>
@@ -191,6 +401,13 @@ const Story = () => {
                             </SelectListItem>
                         </SelectList>
                     </Select>
+
+                    <br/>
+
+                    Check empty Select:
+                    <Select
+                        onChange={()=>{}}
+                    ></Select>
                 </section>
 
         </div>

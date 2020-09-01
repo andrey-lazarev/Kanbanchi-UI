@@ -9,20 +9,20 @@ const Story = () => {
     ];
 
     const cardView = (props: any) => (
-        <div className='kui-files-item'>
+        <div className={'kui-files-item'}>
             <span className="kui-files-item__col kui-files-item__col--icon">
-                <img src={props.file.iconUrl}/>
+                <img src={props.iconUrl}/>
             </span>
             <span className="kui-files-item__col kui-files-item__col--title">
                 <span className="kui-files-item__title">
-                    {props.file.title}
+                    {props.title}
                 </span>
             </span>
             <span className="kui-files-item__col kui-files-item__col--actions">
                 <ButtonsGroup style={{ flexWrap: 'nowrap' }}>
                     <Button variant="icon"><Icon xlink="pin" size={24} /></Button>
                     <Button variant="icon"><Icon xlink="cloud-download" size={24} /></Button>
-                    <Button variant="icon"><Icon xlink="trash" size={24} /></Button>
+                    <Button variant="icon"><Icon xlink="delete" size={24} /></Button>
                 </ButtonsGroup>
             </span>
         </div>
@@ -33,19 +33,29 @@ const Story = () => {
             <section className="section-form-min">
             <h2>Files</h2>
 
-            <Files files={files}>
+            <Files
+                files={files}
+                onClick={() => console.log('add files click')}
+            >
                 Attach files
             </Files>
 
             <br /><br /><br />
 
-            <Files files={files} FileView={cardView}>
+            <Files
+                files={files}
+                FileView={cardView}
+                onClick={() => console.log('add files click FileView')}
+            >
                 Attach files
             </Files>
 
             <br /><br /><br />
 
-            <Files disabled>
+            <Files
+                disabled
+                onClick={() => console.log('add files click disabled')}
+            >
                 Disabled
             </Files>
 

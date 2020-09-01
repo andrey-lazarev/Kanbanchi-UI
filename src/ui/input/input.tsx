@@ -2,7 +2,7 @@ import * as React from 'react';
 import { IInputInheritedProps } from './types';
 import { ClassNames } from '../utils';
 import * as autosizeLibray from './autosize';
-import { Icon, Label } from '../../ui';
+import { Icon, Label, Tooltip } from '../../ui';
 import '../../../src/ui/input/input.module.scss';
 
 export const Input: React.SFC<IInputInheritedProps> =
@@ -12,9 +12,15 @@ React.forwardRef((props, ref) => {
         className,
         color,
         disabled,
+        editable,
         icon,
         isClearable,
+        iconTooltip,
         label,
+        readOnly,
+        searchPlaceholder,
+        state,
+        tooltip,
         value,
         variant,
         onBlur,
@@ -31,9 +37,8 @@ React.forwardRef((props, ref) => {
 
     const [isFilled, setIsFilled] = React.useState(!!value);
     const [isFocusedHook, setIsFocusedHook] = React.useState(false);
-    const [inputValue, setInputValue] = React.useState(value);
-    const [timeoutHook, setTimeoutHook] = React.useState(null);
     const textarea = React.useRef(null);
+    const timer = React.useRef(null);
 
     className = ClassNames(
         'kui-input',
@@ -42,18 +47,16 @@ React.forwardRef((props, ref) => {
         (isFilled) ? 'kui-input--filled' : null,
         (isFocusedHook) ? 'kui-input--focus' : null,
         (!autosize) ? 'kui-input--noresize' : null,
+        (readOnly) ? 'kui-input--readonly' : null,
+        (state) ? 'kui-input--state_' + state : null,
         (variant) ? 'kui-input--variant_' + variant : null,
         className
     );
 
     attributes.className = 'kui-input__item';
-    if (disabled) {
-        attributes.disabled = true;
-    }
 
     attributes.onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setIsFilled(!!e.target.value);
-        setInputValue(e.target.value);
         if (onChange) onChange(e);
     };
 
@@ -70,23 +73,26 @@ React.forwardRef((props, ref) => {
      */
 
     attributes.onBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-        e.persist();
-        setTimeoutHook(setTimeout(() => {
+        if (!document.hasFocus()) return;
+
+        if (e) e.persist();
+        timer.current = setTimeout(() => {
             if (isFocusedHook) {
                 setIsFocusedHook(false);
                 if (onBlur) onBlur(e);
             }
-        }, 200));
+        }, 200);
     }
 
     attributes.onFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-        clearTimeout(timeoutHook);
-        setTimeoutHook(setTimeout(() => {
+        if (e) e.persist();
+        if (timer.current) clearTimeout(timer.current);
+        timer.current = setTimeout(() => {
             if (!isFocusedHook) {
                 setIsFocusedHook(true);
                 if (onFocus) onFocus(e);
             }
-        }, 100));
+        }, 100);
     }
 
     if (label) {
@@ -94,11 +100,41 @@ React.forwardRef((props, ref) => {
     }
 
     const clearInput = (e: React.MouseEvent<HTMLElement>) => {
+        if (disabled) return;
+
         e.preventDefault();
         setIsFilled(false);
-        setInputValue('');
+        textarea.current.value = '';
+        if (variant !== 'datepicker'){
+            textarea.current.focus();
+        }
         if (onChange) onChange(e);
     };
+
+    const iconClear = <Icon
+            xlink="clear"
+            size={24}
+            className="kui-input__icon kui-input__icon--clear"
+            onClick={clearInput}
+        />;
+
+    const getIconOrTooltip = () => {
+        if (iconTooltip) {
+            const tooltipProps = (typeof iconTooltip === 'string')
+                ? { value: iconTooltip }
+                : iconTooltip;
+            return (
+                <Tooltip {...tooltipProps}>
+                    {iconClear}
+                </Tooltip>
+            )
+        }
+        return iconClear
+    };
+
+    if (isClearable) {
+        inputAfter = getIconOrTooltip();
+    }
 
     if (variant === 'arrow' || variant === 'header') {
         inputAfter = <Icon
@@ -108,22 +144,16 @@ React.forwardRef((props, ref) => {
         />;
     } else if
         (variant === 'datepicker') {
+        attributes.readOnly = !editable;
         autosize = false;
         icon = icon || 'calendar';
-        attributes.readOnly = true;
         const iconCalendar = <Icon
             xlink={icon}
             size={24}
             className="kui-input__icon"
         />;
         if (isClearable) {
-            const iconClear = <Icon
-                xlink="clear"
-                size={24}
-                className="kui-input__icon kui-input__icon--clear"
-                onClick={clearInput}
-            />;
-            inputAfter = (isFilled) ? iconClear : iconCalendar;
+            inputAfter = (isFilled) ? getIconOrTooltip() : iconCalendar;
         } else {
             inputAfter = iconCalendar;
         }
@@ -136,14 +166,10 @@ React.forwardRef((props, ref) => {
                 className="kui-input-search__icon"
             />
             <span className="kui-input-search__placeholder">
-                Search
+                {searchPlaceholder}
             </span>
         </span>);
-        inputAfter = <Icon
-            xlink="clear"
-            size={24}
-            className="kui-input__icon kui-input__icon--clear"
-            onClick={clearInput} />;
+        inputAfter = getIconOrTooltip();
     } else if
         (icon && variant === 'withicon') {
         inputAfter = <Icon
@@ -156,18 +182,18 @@ React.forwardRef((props, ref) => {
     const Tag = (autosize) ? 'textarea' : 'input';
 
     React.useEffect(() => {
-        if (autosize) autosizeLibray.default(textarea.current);
-    }, []);
-
-    React.useEffect(() => {
-        return () => {
-            clearTimeout(timeoutHook);
-        };
-    }, [timeoutHook]);
-
-    React.useEffect(() => {
-        setInputValue(value);
+        textarea.current.value = value;
+        setIsFilled(!!value);
+        autosizeLibray.default.update(textarea.current);
     }, [value]);
+
+    React.useEffect(() => {
+        if (autosize) autosizeLibray.default(textarea.current);
+
+        return () => {
+            if (timer.current) clearTimeout(timer.current);
+        };
+    }, []);
 
     React.useImperativeHandle(ref, () => ({
         setIsFilled(value: string) {
@@ -175,8 +201,38 @@ React.forwardRef((props, ref) => {
         },
         getBoundingClientRect() {
             return textarea.current.getBoundingClientRect();
-        }
+        },
+        setFocus(e: React.FocusEvent<HTMLInputElement>) {
+            textarea.current.focus();
+            attributes.onFocus(e);
+        },
+        getInput() {
+            return textarea.current;
+        },
     }));
+
+    let inputElement = (
+        <Tag
+            disabled={disabled}
+            readOnly={readOnly}
+            rows={1}
+            ref={textarea}
+            {...attributes}
+        />
+    );
+
+    if (tooltip) {
+        const tooltipProps = (typeof tooltip === 'string')
+            ? { value: tooltip }
+            : tooltip;
+
+        if (state && !tooltipProps.state) tooltipProps.state = state;
+        inputElement = (
+            <Tooltip {...tooltipProps}>
+                {inputElement}
+            </Tooltip>
+        )
+    }
 
     return (
         <Label
@@ -185,12 +241,7 @@ React.forwardRef((props, ref) => {
         >
             {labelItem}
             {inputBefore}
-            <Tag
-                rows={1}
-                ref={textarea}
-                value={inputValue}
-                {...attributes}
-            ></Tag>
+            {inputElement}
             {inputAfter}
         </Label>
     );
@@ -200,9 +251,14 @@ Input.defaultProps = {
     autosize: true,
     color: null,
     disabled: false,
+    editable: true,
     icon: null,
     isClearable: false,
+    iconTooltip: null,
     label: null,
+    searchPlaceholder: 'Search',
+    state: null,
+    tooltip: null,
     value: '',
     variant: null,
     onEnter: (): void => undefined

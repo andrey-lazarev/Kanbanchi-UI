@@ -15,35 +15,46 @@ export interface ISelectActiveInheritedProps extends
 
 export type ISelectOptionsObject = {[key: string]: string}
 export type ISelectOptionsArray = Array<{
+    active?: boolean;
     value: number | string;
     text?: string;
 }>
+export type ISelectOptions = ISelectOptionsObject | ISelectOptionsArray;
 
 export interface ISelectStateProps {
     active?: number;
-    options?: ISelectOptionsObject | ISelectOptionsArray;
+    options?: ISelectOptions;
 }
 
 export interface ISelectDispatchProps {
+    onActiveChange?: (activeIndex: number) => void;
     onChange: (event: ISelectActiveInheritedProps) => void;
     onEnter?: (event: React.KeyboardEvent<HTMLElement>) => void;
     onOpen?: () => void;
+    onClose?: () => void;
+}
+
+export interface ISelectOwnProps {
+    editable?: boolean;
+    isCloseOnEnter?: boolean;
+    multiple?: boolean;
+    ref?: any;
+    single?: boolean; // for multiple click on option name closes select
 }
 
 export interface ISelectProps extends
     ISelectStateProps,
     ISelectDispatchProps,
+    ISelectOwnProps,
     IDropdownPublicProps,
     IInputPublicProps
-{
-    editable?: boolean;
-    ref?: any;
-}
+{}
 
 export type IConflictFreeHTMLAttributes<E> =
     Pick<React.InputHTMLAttributes<E>, Exclude<keyof React.InputHTMLAttributes<E>,
-        'color'
-        | 'onChange'
+        'color' |
+        'value' |
+        'onChange'
     >>;
 
 export interface ISelectInheritedProps extends

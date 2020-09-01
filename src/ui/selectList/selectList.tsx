@@ -4,6 +4,8 @@ import { ClassNames, ClassList } from '../utils';
 import { Divider } from '../../ui';
 import '../../../src/ui/selectList/selectList.module.scss';
 
+export const SELECT_LIST_CLASS = 'kui-select-list';
+
 export const SelectList: React.SFC<ISelectListInheritedProps> =
 (props) => {
     let {
@@ -19,9 +21,9 @@ export const SelectList: React.SFC<ISelectListInheritedProps> =
         items;
 
     className = ClassNames(
-        'kui-select-list',
-        (!fixActive) ? 'kui-select-list--noactive' : null,
-        (loading) ? 'kui-select-list--loading' : null,
+        SELECT_LIST_CLASS,
+        (!fixActive) ? SELECT_LIST_CLASS + '--noactive' : null,
+        (loading) ? SELECT_LIST_CLASS + '--loading' : null,
         className
     );
 
@@ -30,11 +32,16 @@ export const SelectList: React.SFC<ISelectListInheritedProps> =
 
     const [activeHook, setActiveHook] = React.useState(active);
 
-    const itemsRefs = Array.from({ length: childrenArray.length }, () => React.useRef(null));
+    const itemsRefs = Array.from({ length: 1000 }, () => React.useRef(null)); // const length due to hooks order
 
     items = React.Children.map(childrenArray, (child: React.ReactElement, index) => {
-        const classList = ClassList(child.props.className);
+        if (!child || !child.props) return null;
+        const type = child.type as any;
+        if (type && type.displayName && type.displayName === 'Divider') {
+            return child;
+        }
 
+        const classList = ClassList(child.props.className);
         let indexDivider = classList.indexOf('divider');
         const divider = ~indexDivider ? <Divider /> : null;
         if (~indexDivider) classList.splice(indexDivider, 1);

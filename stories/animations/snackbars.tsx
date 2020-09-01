@@ -9,6 +9,26 @@ const Story = () => {
         queueRef.current.AddSnackbar();
     }
 
+    const [progressHook, setProgressHook] = React.useState(0);
+    const [s] = React.useState<any>({});
+    const [getProgressHook] = React.useState(() => () => s.progressHook);
+    s.progressHook = progressHook;
+    const [intervalHook, setIntervalHook] = React.useState(null);
+
+    React.useEffect(() => {
+        let unmounted = false;
+        setIntervalHook(setInterval(() => {
+            if (unmounted) return;
+            let progress = (getProgressHook() >= 100) ? 0 : getProgressHook() + 1;
+            setProgressHook(progress);
+        }, 100));
+
+        return () => {
+            unmounted = true;
+            clearInterval(intervalHook);
+        };
+    }, []);
+
     return (
         <div className="page">
             <section className="snackbars">
@@ -20,11 +40,13 @@ const Story = () => {
 
                 <h2>Error</h2>
                 <Snackbar
+                    key="1"
                     variant="error"
                     text="The <b>email</b> address is not valid. Please, use name@domain.com format."
                 />
                 <br />
                 <Snackbar
+                    key="2"
                     variant="error"
                     text="The maximum number of seats is exceeded. <br>Click Manage subscription to buy more seats."
                     buttons={[
@@ -34,31 +56,35 @@ const Story = () => {
 
                 <h2>Timer</h2>
                 <Snackbar
+                    key="3"
                     variant="timer"
                     timer={55}
                     text={'Removing Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'}
                     buttons={[
                         {
-                            text: 'Cancel',
-                            onClick: () => console.log('cancel')
+                            text: 'Ok',
+                            isPrimary: true,
+                            onClick: () => console.log('ok')
                         },
                         {
-                            text: 'Ok',
-                            onClick: () => console.log('ok'),
-                            onTimer: true
+                            text: 'Cancel',
+                            onClick: () => console.log('cancel')
                         }
                     ]}
                 />
                 <br />
                 <Snackbar
+                    key="4"
                     timer={5}
                     variant="error"
                     text="Error text shown 5 seconds"
                 />
             </section>
+
             <section className="snackbars">
                 <h2>Info</h2>
                 <Snackbar
+                    key="5"
                     title="We've updated the app!"
                     text="Click to refresh the page and receive updates"
                     buttons={[
@@ -69,9 +95,45 @@ const Story = () => {
                     ]}
                 />
             </section>
+
+            <section className="snackbars">
+                <h2>Promt</h2>
+                <Snackbar
+                    key="6"
+                    variant="promt"
+                    text={'It may take some time'}
+                    title={'We will move your board'}
+                    buttons={[
+                        {
+                            text: 'Start',
+                            isPrimary: true
+                        },
+                        {
+                            text: 'Cancel'
+                        }
+                    ]}
+                />
+            </section>
+
+            <section className="snackbars">
+                <h2>Progress</h2>
+                <Snackbar
+                    key="7"
+                    title="We are moving your board"
+                    text="It may take some time"
+                    buttons={[
+                        {
+                            progress: progressHook,
+                            text: progressHook + '%'
+                        }
+                    ]}
+                />
+            </section>
+
             <section className="snackbars">
                 <h2>Success</h2>
                 <Snackbar
+                    key="8"
                     variant="success"
                     title="Data has been successfully exported"
                     text="We've sent you an email with the link"

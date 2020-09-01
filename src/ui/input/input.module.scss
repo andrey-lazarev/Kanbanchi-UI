@@ -15,7 +15,7 @@
         -moz-appearance: textfield;
     }
 
-    &__item {
+    .kui-input__item {
         width: 100%;
         height: auto;
         min-height: $google-spacing * 5;
@@ -24,8 +24,9 @@
         font-size: $milli-size;
         line-height: $base-line-height;
         border-radius: $base-radius;
-        border: 1px solid calc-color(fade, $color-base, 15);
+        border: 2px solid calc-color(fade, $color-base, 20);
         background: $color-white;
+        cursor: text;
         @include transition;
 
         &::placeholder {
@@ -33,7 +34,7 @@
         }
 
         .kui-input--filled & {
-            border-color: $color-base;
+            border-color: calc-color(fade, $color-base, 30);
             background: $color-light-background;
         }
 
@@ -43,14 +44,15 @@
             white-space: nowrap;
         }
 
-        &:focus {
-            border-color: $color-purple;
-            background: $color-light-background;
-            box-shadow: none;
+        &:hover {
+            border-color: calc-color(fade, $color-base, 30);
+            background: $color-white;
         }
 
-        &:disabled {
-            opacity: .5;
+        &:focus {
+            border-color: $color-purple;
+            background: $color-white;
+            box-shadow: none;
         }
 
         &:invalid {
@@ -58,7 +60,51 @@
         }
     }
 
-    &--disabled {
+    &.kui-input--readonly,
+    &.kui-input--disabled {
+        .kui-input__item {
+            color: $color-base;
+            border-color: calc-color(fade, $color-base, 0);
+            background: $color-light-background;
+        }
+        .kui-input__icon {
+            color: calc-color(fade, $color-base, 30);
+            pointer-events: none;
+        }
+    }
+    
+    &.kui-input--disabled {
+        .kui-input__item {
+            color: calc-color(fade, $color-base, 60);
+        }
+        .kui-input__icon {
+            color: calc-color(fade, $color-base, 10);
+        }
+    }
+
+    &.kui-input--state_error {
+        .kui-input__item {
+            border-color: $color-red;
+        }
+
+        .kui-label__item {
+            color: $color-red;
+        }
+    }
+
+    &.kui-input--state_success {
+        .kui-input__item {
+            border-color: $color-green;
+        }
+
+        .kui-label__item {
+            color: $color-green;
+        }
+    }
+
+    &.kui-input--disabled {
+        pointer-events: none;
+
         .kui-label__item {
             color: calc-color(fade, $color-base, 30);
         }
@@ -90,26 +136,87 @@
         }
     }
 
-    &--variant_withicon {
+    &.kui-input--variant_arrow,
+    &.kui-input--variant_withicon {
         .kui-input__item {
             padding-right: $google-spacing * 5;
         }
 
-        .kui-input__item:focus + .kui-input__icon,
-        &:hover .kui-input__icon {
+        &:not(.kui-input--readonly) .kui-input__item:focus + .kui-input__icon,
+        &:not(.kui-input--readonly):hover .kui-input__icon {
             color: $color-base;
         }
     }
 
-    &--variant_arrow {
+    &.kui-input--variant_search {
         .kui-input__item {
-            padding-right: $google-spacing * 5;
+            -webkit-appearance: textfield;
+            padding-left: $google-spacing * 6;
+            padding-right: $google-spacing * 4;
+        }
+
+        &:hover,
+        &.kui-input--focus {
+            .kui-input__item {
+                box-shadow: $shadow-hover;
+                border-color: transparent;
+            }
         }
     }
 
-    &--color_grey:not(&--focus):not(&--filled) {
+    &.kui-input--color_grey:not(&--focus):not(&--filled),
+    &.kui-input--color_grey.kui-input--variant_search {
         .kui-input__item {
             border-color: transparent;
+            background: $color-white;
         }
+    }
+}
+
+.kui-input-search {
+    position: absolute;
+    bottom: $google-spacing;
+    left: 50%;
+    transform: translateX(-50%);
+    color: calc-color(fade, $color-base, 30);
+    white-space: nowrap;
+    cursor: pointer;
+
+    &__placeholder {
+        padding-left: $google-spacing;
+        color: calc-color(fade, $color-base, 60);
+        user-select: none;
+    }
+}
+
+.kui-input--focus,
+.kui-input--filled {
+    .kui-input-search {
+        left: $google-spacing * 2;
+        transform: translateX(0);
+
+        &__icon {
+            color: $color-base;
+            animation: animation_imput_search .3s ease forwards;
+        }
+
+        &__placeholder {
+            display: none;
+        }
+    }
+}
+
+.kui-input:not(.kui-input--filled):not(.kui-input--focus) {
+    .kui-input-search {
+        animation: animation_imput_search .6s ease forwards;
+    }
+}
+
+@keyframes animation_imput_search {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
     }
 }

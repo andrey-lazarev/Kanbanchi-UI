@@ -9,8 +9,9 @@
     padding: $google-spacing;
     font-size: $milli-size;
     border-radius: $base-radius;
-    border: 1px solid calc-color(fade, $color-base, 15);
+    border: 2px solid calc-color(fade, $color-base, 20);
     background: $color-white;
+    @include transition;
 
     &:hover {
         box-shadow: $shadow-hover;

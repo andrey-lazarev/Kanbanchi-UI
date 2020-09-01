@@ -14,7 +14,7 @@ $font-family-condensed:     'Roboto Condensed', 'Roboto', 'Helvetica Neue', Gene
 
 //  Typography
 $base-font-family:          $font-family-sans-serif !default;
-$base-font-size:            14px !default;
+$base-font-size:            16px !default;
 $base-line-height:          1.5 !default;
 
 $h1-size:                   28px !default;
@@ -51,11 +51,11 @@ $z-topbar:                  1030 !default;
 $z-modal:                   1040 !default;
 $z-modaltop:                1050 !default;
 $z-feedback:                1060 !default;
-$z-tooltip:                 1070 !default;
 $z-noty:                    1080 !default;
 $z-splash:                  2000 !default;
 $z-register:                2100 !default;
 $z-cookies:                 2110 !default;
+$z-tooltip:                 4000 !default;
 
 // iPad hacks
 $magic-delta-touch:         1px !default; // Магическое число для тачей по умолчанию для подгонки высоты
@@ -81,4 +81,4 @@ $media-screens: (
 // shadows
 $shadow-default: 0 $google-spacing / 4  $google-spacing rgba($color-base, .2);
 $shadow-hover: 0 $google-spacing / 2  $google-spacing * 2 rgba($color-base, .3);
-$shadow-modal: 0 $google-spacing $google-spacing * 3 rgba($color-base, .2);
+$shadow-modal: 0 $google-spacing $google-spacing * 3 rgba($color-base, .4);

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ISnackbarInheritedProps, ISnackbarButtonProps, ISnackbarDefaultIcons } from './types';
+import { ISnackbarInheritedProps, ISnackbarDefaultIcons } from './types';
 import { ClassNames } from '../utils';
 import { Button, ButtonsGroup, Icon } from '../../ui';
 import '../../../src/ui/snackbar/snackbar.module.scss';
@@ -31,26 +31,26 @@ export const Snackbar: React.SFC<ISnackbarInheritedProps> =
     if (variant === 'timer' && timer === null) timer = 10;
 
     let buttonsGroup = [],
-        buttonsGroupDiv = null,
-        onTimerDefault = onTimer;
+        buttonsGroupDiv = null;
 
     if (buttons) {
         buttonsGroup = buttons.map((item, key) => {
             let {
+                isPrimary,
                 text,
-                onClick,
-                onTimer,
                 ...attributes
             } = item;
 
-            if (onTimer) onTimerDefault = onClick;
+            const buttonClassName = ClassNames(
+                'kui-snackbar__button',
+                (isPrimary) ? 'kui-snackbar__button--primary' : null
+            );
 
             return (
                 <Button
-                    className="kui-snackbar__button"
+                    className={buttonClassName}
                     color="white"
                     key={key}
-                    onClick={()=>onButtonClick(item)}
                     {...attributes}
                 >
                     {text}
@@ -64,46 +64,43 @@ export const Snackbar: React.SFC<ISnackbarInheritedProps> =
         );
     }
 
-    const onButtonClick = (button: ISnackbarButtonProps) => {
-        if (button.onClick) button.onClick();
-        hideSnackbar();
-    };
-
-    const onTimerAction = () => {
-        if (onTimerDefault) onTimerDefault();
-        hideSnackbar();
-    };
-
-    const hideSnackbar = () => {
-        setTimerHook(null);
-        setIsShownHook(false);
-    };
+    const refSnackbar = React.useRef(null);
 
     const [timerHook, setTimerHook] = React.useState(timer);
     const [timeoutHook, setTimeoutHook] = React.useState(null);
-    const [isShownHook, setIsShownHook] = React.useState(true);
+    const [s] = React.useState<any>({});
+    const [getTimerHook] = React.useState(() => () => s.timerHook);
+    s.timerHook = timerHook;
 
     React.useEffect(() => {
-        if (timerHook === null) {
-            clearTimeout(timeoutHook);
-            return;
+        if (attributes.onBlur) {
+            refSnackbar.current.focus();
         }
-        if (timerHook < 1) {
-            onTimerAction();
-        } else {
-            setTimeoutHook(setTimeout(() => {
-                setTimerHook(timerHook - 1);
-            }, 1000));
-        }
-        return () => {
-            clearTimeout(timeoutHook);
-        }
-    }, [timerHook]);
 
-    return isShownHook && (
+        let unmounted = false;
+        if (timerHook === null) return;
+        setTimeoutHook(setInterval(() => {
+            if (unmounted) return;
+            if (getTimerHook() < 1) {
+                if (onTimer) onTimer();
+                clearInterval(timeoutHook);
+            } else {
+                setTimerHook(getTimerHook() - 1);
+            }
+        }, 1000));
+
+        return () => {
+            unmounted = true;
+            clearInterval(timeoutHook);
+        }
+    }, []);
+
+    return (
         <div className="kui-snackbar__container">
             <div
                 className={className}
+                ref={refSnackbar}
+                tabIndex={0}
                 {...attributes}
             >
                 <Icon xlink={xlink} size={24} className="kui-snackbar__icon" />
@@ -133,6 +130,7 @@ Snackbar.defaultProps = {
     timer: null,
     title: null,
     variant: 'info',
+    onBlur: null,
     onTimer: () => undefined,
 };
 

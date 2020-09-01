@@ -32,6 +32,10 @@ React.forwardRef((props, ref) => {
         if (onChange) onChange(e);
     };
 
+    React.useEffect(() => {
+        setIsChecked(checked);
+    }, [checked]);
+
     return (
         <Label
             className={className}
@@ -40,7 +44,7 @@ React.forwardRef((props, ref) => {
             <input checked={isChecked} {...attributes}/>
             <span className="kui-checkbox__label">
                 {children}
-                <Icon className="kui-checkbox__checkmark" xlink="checkbox-ok"/>
+                <Icon className="kui-checkbox__checkmark" xlink="done"/>
             </span>
         </Label>
     );

@@ -10,6 +10,7 @@
     border-radius: $base-radius;
     background-color: $color-purple;
     box-shadow: 0 $google-spacing $google-spacing * 2 calc-color(fade, $color-base, 10);
+    outline: none;
     :global {
         animation: snackbarShow .5s ease-in-out forwards;
     }
@@ -42,7 +43,7 @@
     }
 
     &__text {
-        font-size: $base-font-size;
+        font-size: $milli-size;
     }
 
     &__timer {
@@ -70,6 +71,10 @@
         background-color: $color-red;
     }
 
+    &--variant_promt {
+        background-color: $color-base;
+    }
+
     &--variant_success {
         background-color: $color-green;
     }
@@ -89,8 +94,13 @@
         }
     }
 
-    &--notitle &__text {
-        font-size: $h5-size;
+    &__button--primary {
+        background: calc-color(fade, $color-white, 50);
+
+        &:focus,
+        &:hover {
+            background: calc-color(fade, $color-white, 60);
+        }
     }
 
     @media (max-width: $media-iPad) {
@@ -109,8 +119,7 @@
             width: 100%;
         }
 
-        &__title,
-        &--notitle &__text {
+        &__title {
             font-size: $base-font-size;
         }
 
@@ -129,7 +138,7 @@
     0% {
         transform: translateY(100%);
     }
-    100% {     
+    100% {
         transform: none;
     }
 }
@@ -139,7 +148,7 @@
         opacity: .2;
         transform: scale(.2);
     }
-    20%, 
+    20%,
     80% {
         opacity: 1;
         transform: scale(1);

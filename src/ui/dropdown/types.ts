@@ -6,14 +6,27 @@ export type IDropdownDirectionVertical =
 export interface IDropdownPublicProps {
     directionVertical?: IDropdownDirectionVertical;
     directionHorizontal?: 'left' | 'right';
+    dropdownClassName?: string;
+    isFitWindow?: boolean;
+    isMountClosed?: boolean;
+    notBlurClasses?: string[];
     opened?: boolean;
+    portal?: boolean;
+    portalId?: string;
+    portalSelector?: string;
+    beforeOpen?: () => Promise<any>;
+    onDidMount?: () => void;
+    onDidUnmount?: () => void;
+}
+
+export interface IDropdownOwnProps {
+    ref?: any;
 }
 
 export interface IDropdownProps extends
-    IDropdownPublicProps
-{
-    ref?: any;
-}
+    IDropdownPublicProps,
+    IDropdownOwnProps
+{}
 
 export type IConflictFreeHTMLAttributes<E> = React.HTMLAttributes<E>;
 

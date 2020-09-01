@@ -6,12 +6,17 @@ export interface ICheckboxDispatchProps {
     onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
+export interface ICheckboxOwnProps {
+    color?:
+        'black' |
+        'light';
+}
+
 export interface ICheckboxProps extends
     ICheckboxStateProps,
-    ICheckboxDispatchProps
-{
-    color?: 'black';
-}
+    ICheckboxDispatchProps,
+    ICheckboxOwnProps
+{}
 
 export type IConflictFreeHTMLAttributes<E> =
     Pick<React.InputHTMLAttributes<E>, Exclude<keyof React.InputHTMLAttributes<E>,
@@ -20,6 +25,6 @@ export type IConflictFreeHTMLAttributes<E> =
     >>;
 
 export interface ICheckboxInheritedProps extends
-    ICheckboxProps,
-    IConflictFreeHTMLAttributes<HTMLInputElement>
+    IConflictFreeHTMLAttributes<HTMLInputElement>,
+    ICheckboxProps
 {}
