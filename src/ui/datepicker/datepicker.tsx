@@ -1,21 +1,20 @@
 import * as React from 'react';
 import { IDatePickerInheritedProps } from './types';
 import ReactDatepicker, { registerLocale } from 'react-datepicker';
-import * as enGB from 'date-fns/locale/en-GB';
+import enGB from 'date-fns/locale/en-GB';
 import { ClassNames } from '../utils';
 import { Input } from '../../ui';
 import 'react-datepicker/dist/react-datepicker.css';
 import '../../../src/ui/datepicker/datepicker.module.scss';
 
 const ReactDatepickerElement = ReactDatepicker as any;
-
 registerLocale('en-GB', enGB); // Weeks start on Monday
 
 // accessibility ok+-
 // можно обновить до 3.4.1, там со скринридером всё хорошо, не нужны эти костыли, но проблемы с зависимостями
 // upd 4.3.0
 
-export const Datepicker: React.SFC<IDatePickerInheritedProps> =
+export const Datepicker: React.FC<IDatePickerInheritedProps> =
 React.forwardRef((props, ref) => {
     let {
         className,
@@ -46,7 +45,7 @@ React.forwardRef((props, ref) => {
     const pickerRef = React.useRef(null);
 
     isClearable = readOnly || disabled ? false : isClearable;
-    editable = readOnly || disabled ? false : editable;
+    editable =  readOnly || disabled ? false : editable;
 
     const inputAttributes = {
         color,
@@ -69,12 +68,34 @@ React.forwardRef((props, ref) => {
 
     const onChangeHandler = (date: Date) => {
         if (onChange) onChange(date);
+        setTimeout(()=>{
+            if (document.activeElement === document.body) { // фокус отвалился, вернуть фокус инпуту
+                const input = datepickerRef.current.querySelector('input') as HTMLElement;
+                if (input) input.focus();
+            }
+        }, 100);
+    }
+
+    const onBlurHandler = (e: React.FocusEvent) => {
+        if (e && e.relatedTarget) {
+            const closest = e.relatedTarget.closest('.kui-datepicker');
+            if (closest && closest === datepickerRef.current) return;
+        }
+        pickerRef.current.setOpen(false); // был баг: если убрать фокус табом, календарь не закрывается
+    }
+
+    const onKeyDown = (e: React.KeyboardEvent) => {
+        if (e && e.key === 'Escape') {
+            e.stopPropagation();
+        }
     }
 
     return (
         <div
             className={className}
             ref={datepickerRef}
+            tabIndex={-1}
+            onBlur={onBlurHandler}
         >
             <ReactDatepickerElement
                 customInput={<Input {...inputAttributes}/>}
@@ -84,6 +105,7 @@ React.forwardRef((props, ref) => {
                 ref={pickerRef}
                 selected={selected}
                 onChange={onChangeHandler}
+                onKeyDown={onKeyDown}
                 {...attributes}
             />
         </div>

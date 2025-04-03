@@ -3,8 +3,9 @@ import { storiesOf } from '@storybook/react';
 import { Datepicker } from '../../src/ui';
 
 const Story = () => {
-    const [date, setDate] = React.useState<Date>(null);
-    const [date01, setDate01] = React.useState(new Date());
+    const [date, setDate] = React.useState<Date | null>(null);
+    const [date01, setDate01] = React.useState<Date | null>(new Date());
+    const [date02, setDate02] = React.useState<Date | null>(new Date());
 
     return (
         <div className="page">
@@ -26,13 +27,17 @@ const Story = () => {
                     label="Not editable input"
                     minDate={new Date('2001-01-01')}
                     maxDate={new Date('2049-12-31')}
-                    popperModifiers={{
-                        preventOverflow: {
+                    popperModifiers={[
+                        {
+                            name: 'preventOverflow',
                             enabled: true,
-                            escapeWithReference: false, // force popper to stay in viewport (even when input is scrolled out of view)
-                            boundariesElement: 'scrollParent'
+                            options: {
+                                mainAxis: false,
+                                altAxis: true,
+                                altBoundary: true,
+                            }
                         }
-                    }}
+                    ]}
                     popperPlacement="bottom-start"
                     readOnly={false}
                     selected={date01}
@@ -45,9 +50,9 @@ const Story = () => {
 
 <Datepicker
     label="Error"
-    selected={date01}
+    selected={date02}
     state={'error'}
-    onChange={val=>setDate01(val)}
+    onChange={val=>setDate02(val)}
 />
 
                 <br/><br/>
@@ -55,7 +60,6 @@ const Story = () => {
                 <Datepicker
                     readOnly={true}
                     editable={true}
-                    selected={null}
                     label="Readonly"
                     onChange={()=>{}}
                 />
@@ -75,7 +79,6 @@ const Story = () => {
                 <Datepicker
                     disabled={true}
                     editable={true}
-                    selected={null}
                     label="Disabled"
                     onChange={()=>{}}
                 />

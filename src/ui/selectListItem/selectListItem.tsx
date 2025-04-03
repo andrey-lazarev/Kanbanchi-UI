@@ -9,13 +9,14 @@ export const SELECT_LIST_ITEM_CLASS = 'kui-select-list-item';
 
 // accessibility ok
 
-export const SelectListItem: React.SFC<ISelectListItemInheritedProps> =
+export const SelectListItem: React.FC<ISelectListItemInheritedProps> =
 React.forwardRef((props, ref) => {
     let {
         children,
         className,
         icon,
         iconSize,
+        iconStyle = {},
         list,
         listLabel,
         ...attributes
@@ -36,6 +37,7 @@ React.forwardRef((props, ref) => {
             className="kui-select-list-item__icon"
             size={iconSize}
             xlink={icon}
+            style={iconStyle}
         />;
     }
 

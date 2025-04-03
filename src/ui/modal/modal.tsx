@@ -13,13 +13,14 @@ import FocusLock from 'react-focus-lock';
 
 // accessibility ok
 
-export const Modal: React.SFC<IModalInheritedProps> =
+export const Modal: React.FC<IModalInheritedProps> =
 (props) => {
     let {
         children,
         className,
         blockSelector,
         buttons,
+        isNotFocusLock,
         release,
         title,
         variant,
@@ -86,7 +87,7 @@ export const Modal: React.SFC<IModalInheritedProps> =
     }
 
     if (variant === 'release' && release) {
-        footer = (
+        footer = release.footer && (
             <div className="kui-modal__footer kui-modal__footer--release">
                 <div className="kui-modal__footer-stars">
                     <Icon size={24} xlink="google-color"/>
@@ -150,7 +151,11 @@ export const Modal: React.SFC<IModalInheritedProps> =
         ) => {
             const slidesCount = release.slides.length;
             let newIndex = state.currentSlide - 2;
-            if (newIndex < 0) newIndex += slidesCount;
+            if (newIndex < 0) {
+                newIndex += slidesCount;
+            } else if (newIndex >= slidesCount) {
+                newIndex -= slidesCount;
+            }
             setTitleHook(release.slides[newIndex].title);
         }
 
@@ -168,9 +173,7 @@ export const Modal: React.SFC<IModalInheritedProps> =
                         `}
                         variant={'icon'}
                         onClick={onClick}
-                    >
-                        <Icon size={16} xlink={'dot'} />
-                    </Button>
+                    />
                 );
             };
             slides = (<Carousel
@@ -246,6 +249,7 @@ export const Modal: React.SFC<IModalInheritedProps> =
     const onKeyDown = (e: React.KeyboardEvent) => {
         if (!e) return;
         if (e.key === 'Escape') {
+            e.stopPropagation();
             return onClose();
         }
     }
@@ -259,6 +263,33 @@ export const Modal: React.SFC<IModalInheritedProps> =
         }
     }, []);
 
+    const item = (
+        <form
+            className="kui-modal__item"
+            role={'dialog'}
+            aria-modal={true}
+            aria-labelledby={uniqueClass + '__header-title'}
+            aria-describedby={uniqueClass + '__body'}
+        >
+            <div className="kui-modal__header">
+                <div
+                    className="kui-modal__header-title"
+                    id={uniqueClass + '__header-title'}
+                    dangerouslySetInnerHTML={{__html: titleHook}}
+                ></div>
+                {closeButton}
+            </div>
+            <div
+                className="kui-modal__body"
+                id={uniqueClass + '__body'}
+            >
+                {children}
+                {slides}
+            </div>
+            {footer}
+        </form>
+    );
+
     return (
         <div
             className={className}
@@ -270,33 +301,12 @@ export const Modal: React.SFC<IModalInheritedProps> =
                 className="kui-modal__overlay"
                 onClick={onClose}
             />
-            <FocusLock returnFocus>
-                <form
-                    className="kui-modal__item"
-                    role={'dialog'}
-                    aria-modal={true}
-                    aria-labelledby={uniqueClass + '__header-title'}
-                    aria-describedby={uniqueClass + '__body'}
-                >
-                    <div className="kui-modal__header">
-                        <div
-                            className="kui-modal__header-title"
-                            id={uniqueClass + '__header-title'}
-                        >
-                            {titleHook}
-                        </div>
-                        {closeButton}
-                    </div>
-                    <div
-                        className="kui-modal__body"
-                        id={uniqueClass + '__body'}
-                    >
-                        {children}
-                        {slides}
-                    </div>
-                    {footer}
-                </form>
-            </FocusLock>
+            {isNotFocusLock
+                ? item
+                : <FocusLock returnFocus>
+                    {item}
+                </FocusLock>
+            }
         </div>
     );
 };

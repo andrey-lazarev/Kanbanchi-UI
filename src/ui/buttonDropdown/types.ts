@@ -1,8 +1,10 @@
-import { IDropdownPublicProps } from './../dropdown/types';
+import { IDropdownDirectionVertical, IDropdownPublicProps } from './../dropdown/types';
 
 export interface IButtonDropdownStateProps {
     disabled?: boolean;
+    dontChangeFocus?: boolean;
     dropdownClassName?: string;
+    isMoveToFit?: boolean;
     multiple?: boolean;
     portal?: boolean;
     portalId?: string;
@@ -13,6 +15,7 @@ export interface IButtonDropdownStateProps {
 export interface IButtonDropdownDispatchProps {
     onOpen?: () => void;
     onClose?: () => void;
+    onDirectionVerticalSet?: (directionVertical: IDropdownDirectionVertical) => void;
 }
 
 export interface IButtonDropdownProps extends

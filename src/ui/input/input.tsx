@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 // accessibility ok
 
-export const Input: React.SFC<IInputInheritedProps> =
+export const Input: React.FC<IInputInheritedProps> =
 React.forwardRef((props, ref) => {
     let {
         autosize,
@@ -22,6 +22,7 @@ React.forwardRef((props, ref) => {
         label,
         readOnly,
         searchPlaceholder,
+        size,
         state,
         tooltip,
         value,
@@ -43,6 +44,8 @@ React.forwardRef((props, ref) => {
     const textarea = React.useRef(null);
     const [uniqueClass] = React.useState('kui-input--' + uuidv4());
     const timer = React.useRef(null);
+    const [cursor, setCursor] = React.useState(null);
+    const [isCmdZ, setCmdZ] = React.useState(null);
 
     className = ClassNames(
         'kui-input',
@@ -54,6 +57,7 @@ React.forwardRef((props, ref) => {
         (readOnly) ? 'kui-input--readonly' : null,
         (state) ? 'kui-input--state_' + state : null,
         (variant) ? 'kui-input--variant_' + variant : null,
+        (size) ? 'kui-input--size_' + size : null,
         className
     );
 
@@ -62,12 +66,16 @@ React.forwardRef((props, ref) => {
     attributes.onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setIsFilled(!!e.target.value);
         if (onChange) onChange(e);
+        setCursor(e.target.selectionStart);
     };
 
     attributes.onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e && e.key === 'Enter') {
             if (!autosize) e.preventDefault();
             if (onEnter) onEnter(e);
+        }
+        if (e && e.metaKey && e.key === 'z') {
+            setCmdZ(true);
         }
         if (onKeyDown) onKeyDown(e);
     };
@@ -104,6 +112,26 @@ React.forwardRef((props, ref) => {
             }
         }, 100);
     }
+
+    /**
+     * KNB-2481 bug with input blur/focus on ios/macos https://codepen.io/cliener/pen/ooGpwW
+     * solution from https://github.com/cliener/input-fixer
+     */
+    const lastEventTime = React.useRef(0);
+    const throttleDuration = 300; // ms
+    const throttleEvent = (event: React.FocusEvent<HTMLInputElement>) => {
+        const timeStamp = event.timeStamp;
+
+        if (timeStamp < (lastEventTime.current + throttleDuration)) {
+            event.preventDefault();
+            event.stopPropagation();
+            return false;
+        }
+
+        lastEventTime.current = timeStamp; // Only set the new time stamp if the event is valid
+    }
+    attributes.onFocusCapture = throttleEvent;
+    attributes.onBlurCapture = throttleEvent;
 
     if (label) {
         labelItem = (<div className="kui-label__item">{label}</div>);
@@ -225,8 +253,22 @@ React.forwardRef((props, ref) => {
     React.useEffect(() => {
         textarea.current.value = value;
         setIsFilled(!!value);
-        autosizeLibray.default.update(textarea.current);
+        requestAnimationFrame(()=> { // подождать autosizeLibray.default. был баг высоты email в boardDetails
+            autosizeLibray.default.update(textarea.current);
+        });
     }, [value]);
+
+    // fix safari cursor jump: https://stackoverflow.com/questions/46000544/react-controlled-input-cursor-jumps
+    React.useEffect(() => {
+        if (isCmdZ) { // фикс путает выделение текста при команд зет
+            setCmdZ(false);
+            return;
+        }
+        if (!cursor) return;
+        try { // many input types do not support selection
+            textarea.current.setSelectionRange(cursor, cursor);
+        } catch (e) { /* noop */ }
+    }, [cursor]);
 
     React.useEffect(() => {
         if (autosize) autosizeLibray.default(textarea.current);
@@ -298,6 +340,7 @@ Input.defaultProps = {
     iconTooltip: null,
     label: null,
     searchPlaceholder: 'Search',
+    size: null,
     state: null,
     tooltip: null,
     value: '',

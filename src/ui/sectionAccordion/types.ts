@@ -1,5 +1,5 @@
 import { IButtonInheritedProps } from './../button/types';
-import { ReactChild } from 'react';
+import { CSSProperties, ReactChild } from 'react';
 
 export interface ISectionAccordionStateProps {
     opened?: boolean;
@@ -11,10 +11,11 @@ export interface ISectionAccordionDispatchProps {
 }
 
 export interface ISectionAccordionOwnProps {
-    Action?: React.SFC<IButtonInheritedProps>;
+    Action?: React.FC<IButtonInheritedProps>;
     color?: 'grey';
     icon?: string;
     title?: ReactChild;
+    titleStyle?: CSSProperties;
     variant?: 'simple';
 }
 

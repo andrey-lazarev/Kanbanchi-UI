@@ -1,16 +1,17 @@
 @import '../../assets/sass/index.scss';
-
 .kui-select {
     position: relative;
 
-    .kui-dropdown__item {
-        min-width: 100%;
+    &:not(.kui-select--variant_search):not(.kui-search--uplifted) {
+        .kui-dropdown__item {
+            min-width: 100%;
+        }
     }
 
     &:not(.kui-select--readonly):not(.kui-select--disabled) {
         .kui-input--readonly {
             .kui-input__item {
-                border: 2px solid calc-color(fade, $color-base, 20);
+                border: 2px solid $color-background;
                 background: $color-white;
                 cursor: pointer;
             }
@@ -19,8 +20,7 @@
         &:hover,
         &.kui-select--opened {
             .kui-input__item {
-                box-shadow: $shadow-hover;
-                border-color: calc-color(fade, $color-base, 0);
+                border-color: $border-color-hover;
             }
 
             .kui-input__icon:not(.kui-input__icon--clear) {
@@ -28,14 +28,13 @@
             }
         }
 
-        .kui-input__item:focus {
-            box-shadow: $shadow-hover;
-            border-color: calc-color(fade, $color-base, 0);
-        }
-
         &.kui-select--opened {
             .kui-input__icon--arrow {
                 transform: scaleY(-1);
+            }
+
+            .kui-input__item {
+                border-color: $color-purple;
             }
         }
     }

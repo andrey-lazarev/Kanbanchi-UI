@@ -5,6 +5,7 @@ import '../../../src/ui/tooltip/tooltip.module.scss';
 import { Portal, KUI_PORTAL_ID } from './../portal/portal';
 import { Icon } from '../icon/icon';
 import { v4 as uuidv4 } from 'uuid';
+import { isTouchScreen } from './helpers/isTouchScreen';
 
 // accessibility ok
 
@@ -41,8 +42,12 @@ React.forwardRef((props, ref) => {
         onHide,
     } = props;
 
+    const isTouch = isTouchScreen();
+    const isHint = variant === 'hint';
+    if (!isHint && isTouch && children) return children as JSX.Element;
+
     if (isHidable === undefined) isHidable = true;
-    const WAIT_BEFORE_SHOW = delay || 300;
+    const WAIT_BEFORE_SHOW = delay || 1000;
     const WAIT_ANIMATION = 200;
     const WAIT_BEFORE_HIDE = delayClose || 100;
     const MOUSE_DEBOUNCE = 200;
@@ -93,7 +98,6 @@ React.forwardRef((props, ref) => {
         if (!portalSelector) portalSelector = '.' + uniqueClass;
     }
 
-    const isHint = variant === 'hint';
     let html: JSX.Element[] = [];
     let ariaLabel = value || '';
 
@@ -143,7 +147,9 @@ React.forwardRef((props, ref) => {
                 setIsMount(false);
                 timer.current = setTimeout(() => { // tooltip didn't mount, wait
                     setIsMount(true);
-                    res(calcTooltip(index));
+                    timer.current = setTimeout(() => {
+                        res(calcTooltip(index));
+                    }, 100);
                 }, 100);
             } else {
                 let itemRect = item.getBoundingClientRect();
