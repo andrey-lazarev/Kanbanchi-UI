@@ -248,6 +248,7 @@ export const Select = React.forwardRef((
                     setActiveHook(e.item.index);
                 }
                 if (onChange) onChange(e);
+                if (onClose) onClose();
             }
         } else { // input changed
             if (e.target.value) setIsOpenedHook(true);
