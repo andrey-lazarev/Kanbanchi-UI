@@ -248,6 +248,7 @@ export const Select = React.forwardRef((
                     setActiveHook(e.item.index);
                 }
                 if (onChange) onChange(e);
+                if (onClose) onClose();
             }
         } else { // input changed
             if (e.target.value) setIsOpenedHook(true);
@@ -479,6 +480,30 @@ export const Select = React.forwardRef((
             if (timer.current) clearTimeout(timer.current);
         }
     }, []);
+
+    const debounceRef = React.useRef(null);
+    React.useEffect(() => {
+        if (!isOpened || !dropdownRef.current) return;
+        function onResize() {
+            if (debounceRef.current) clearTimeout(debounceRef.current);
+            debounceRef.current = setTimeout(() => {
+                const dropdownItem = dropdownRef.current && dropdownRef.current.children[0];
+                if (!dropdownItem) return;
+                const _isScroll = dropdownItem.offsetHeight < dropdownItem.scrollHeight;
+                if (_isScroll !== isScroll) {
+                    setScroll(dropdownItem.offsetHeight < dropdownItem.scrollHeight);
+                }
+            }, 200);
+        }
+        const mutationObserver = new MutationObserver(onResize);
+        const resizeObserver = new ResizeObserver(onResize);
+        mutationObserver.observe(dropdownRef.current, {attributes: false, childList: true, subtree: true});
+        resizeObserver.observe(dropdownRef.current);
+        return () => {
+            mutationObserver.disconnect();
+            resizeObserver.disconnect();
+        }
+    }, [isOpened]);
 
     React.useEffect(() => {
         scrollList();

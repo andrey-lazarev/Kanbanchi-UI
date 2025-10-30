@@ -4,7 +4,7 @@ import { ClassNames, getParentsClasses, SCREEN_PADDING, useCombinedRefs } from '
 import { Dropdown } from '../../ui';
 import '../../../src/ui/buttonDropdown/buttonDropdown.module.scss';
 import { v4 as uuidv4 } from 'uuid';
-import { Portal, KUI_PORTAL_ID } from '../portal/portal';
+import { KUI_PORTAL_ID, Portal } from '../portal/portal';
 import { SELECT_LIST_ITEM_CLASS } from '../selectListItem/selectListItem';
 import { SELECT_LIST_CLASS } from '../selectList/selectList';
 
@@ -24,6 +24,7 @@ export const ButtonDropdown = React.forwardRef((
         dropdownClassName,
         isFitWindow,
         isMoveToFit,
+        isKeepOpen,
         isScaleAnimation,
         multiple,
         notBlurClasses,
@@ -228,6 +229,14 @@ export const ButtonDropdown = React.forwardRef((
             }
         }
 
+        if (isKeepOpen) {
+            const dropdown = dropdownRef.current && dropdownRef.current.children[0];
+            if (dropdownRef) {
+                dropdown.focus();
+                return;
+            }
+        }
+
         setIsOpened(false);
         if (onBlur) onBlur(e);
     }
@@ -251,6 +260,17 @@ export const ButtonDropdown = React.forwardRef((
     let childrenArray: Array<{}> = // children could be string, we need array
         (Array.isArray(children)) ? children : [children];
 
+    const onButtonKeyDown = (
+        e: React.KeyboardEvent,
+        onKeyDownOwn: (e: React.KeyboardEvent) => void,
+    ) => {
+        if (e.key === 'Escape') {
+            e.stopPropagation();
+            setIsOpened(false);
+        }
+        if (onKeyDownOwn) onKeyDownOwn(e);
+    };
+
     list = React.Children.map(childrenArray, (child: any) => {
         if (!child || !child.props) return null;
         if (child.type.displayName === 'Button') {
@@ -262,7 +282,8 @@ export const ButtonDropdown = React.forwardRef((
                 ['aria-haspopup']: true,
                 ['aria-expanded']: isOpenedHook,
                 ...attributes,
-                ref: buttonButtonRef
+                ref: buttonButtonRef,
+                onKeyDown: (e: React.KeyboardEvent) => onButtonKeyDown(e, attributes.onKeyDown),
             });
             return null;
         }
